@@ -1,0 +1,75 @@
+﻿@using HospitalAdmin.Data.Models
+@using HospitalAdmin.Services.Interfaces
+
+@inject IPatientService patientService
+@inject NavigationManager navigation
+
+@page "/register-patient/{Id:long}"
+
+<PageTitle>Gerenciar médicos</PageTitle>
+
+<h2>Gerenciar médicos</h2>
+
+<div class="card card-custom mt-6">
+    <EditForm Model="patientModel" OnValidSubmit="OnFormSubmit">
+        <div class="card-body">
+            <div class="form-group">
+                <h5 class="mb-3">Cadastrar paciente</h5>
+
+                <div class="row">
+                    <div class="col-sm-12 col-md-6">
+                        <InputText class="form-control" placeholder="Nome do paciente" @bind-Value="patientModel.Name" />
+                    </div>
+                    <div class="col-sm-12 col-md-6">
+                        <InputText class="form-control" placeholder="Email do paciente" @bind-Value="patientModel.Email" />
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-secondary" @onclick="CancelButton">Cancelar</button>
+
+                        <button type="submit" class="btn btn-success">Salvar</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </EditForm>
+
+</div>
+
+
+@code {
+
+    [Parameter]
+    public long Id { get; set; }
+
+    private PatientModel patientModel = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id > 0)
+        {
+            patientModel = await patientService.GetPatientByIdAsync(Id);
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnFormSubmit()
+    {
+        if (Id == 0)
+        {
+            await patientService.AddPatient(patientModel);
+            navigation.NavigateTo("/grid-patients");
+        }
+        else
+        {
+            await patientService.UpdatePatient(patientModel);
+            navigation.NavigateTo("/grid-patients");
+        }
+        await Task.CompletedTask;
+    }
+
+    private void CancelButton() => navigation.NavigateTo("/grid-patients");
+}

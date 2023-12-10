@@ -1,0 +1,112 @@
+﻿@page "/register-scheduling/{Id:long}"
+
+@using HospitalAdmin.Data.Models
+@using HospitalAdmin.Services.Interfaces
+
+@inject ISchedulingService schedulingService
+@inject IDoctorService doctorService
+@inject IPatientService patientService
+@inject NavigationManager navigation
+
+
+<PageTitle>Gerenciar consultas</PageTitle>
+
+<h2>Gerenciar consultas</h2>
+
+<div class="card card-custom mt-6">
+    <EditForm Model="schedulingModel" OnValidSubmit="OnFormSubmit">
+        <div class="card-body">
+            <div class="form-group">
+                <h5 class="mb-3">Cadastrar consulta</h5>
+
+                <div class="row">
+                    <div class="col-sm-12 col-md-6">
+                        <InputText class="form-control" placeholder="Descrição da consulta" @bind-Value="schedulingModel.Description" />
+                    </div>
+                    <div class="col-sm-12 col-md-6">
+                        <RadzenDropDown
+                                    AllowClear="true"
+                                    class="form-control form-control-sm form-control-solid border-primary"
+                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                    FilterOperator="StringFilterOperator.Contains"
+                                    AllowFiltering="true"
+                                    Style="width:100%"
+                                    Placeholder="Selecione um médico"
+                                    Data=@doctorList
+                                    ValueProperty="Id"
+                                    TextProperty="Name"
+                                    @bind-Value="selectedDoctor" />
+
+
+                    </div>
+
+                    <div class="col-sm-12 col-md-6">
+                        <RadzenDropDown AllowClear="true"
+                                        class="form-control form-control-sm form-control-solid border-primary"
+                                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                        FilterOperator="StringFilterOperator.Contains"
+                                        AllowFiltering="true"
+                                        Style="width:100%"
+                                        Placeholder="Selecione um paciente"
+                                        Data=@patientList
+                                        ValueProperty="Id"
+                                        TextProperty="Name"
+                                        @bind-Value="selectedPatient" />
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-secondary" @onclick="CancelButton">Cancelar</button>
+
+                        <button type="submit" class="btn btn-success">Salvar</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </EditForm>
+
+</div>
+
+
+@code {
+
+    [Parameter]
+    public long Id { get; set; }
+
+    private SchedulingModel schedulingModel = new();
+    private List<DoctorModel> doctorList = new();
+    private long selectedDoctor;
+    private List<PatientModel> patientList = new();
+    private long selectedPatient;
+
+    protected override async Task OnInitializedAsync()
+    {
+        doctorList = await doctorService.GetAllDoctorsAsync();
+        patientList = await patientService.GetAllPatientsAsync();
+
+        if (Id > 0)
+        {
+            schedulingModel = await schedulingService.GetSchedulingByIdAsync(Id);
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnFormSubmit()
+    {
+        if (Id == 0)
+        {
+            await schedulingService.AddScheduling(schedulingModel);
+            navigation.NavigateTo("/");
+        }
+        else
+        {
+            await schedulingService.UpdateScheduling(schedulingModel);
+            navigation.NavigateTo("/");
+        }
+        await Task.CompletedTask;
+    }
+
+    private void CancelButton() => navigation.NavigateTo("/");
+}

@@ -1,0 +1,76 @@
+﻿@page "/"
+@using HospitalAdmin.Data.Models
+@using HospitalAdmin.Services.Interfaces
+
+@inject IDoctorService doctorService
+@inject NavigationManager navigation
+
+<PageTitle>Gerenciar médicos</PageTitle>
+
+
+<div class="form-group row">
+    <div class ="col-9">
+        <h2>Gerenciar médicos</h2>
+    </div>
+    <div class="col-3">
+        <button type="button" class="btn btn-success" @onclick="AddDoctor">Adicionar médico</button>
+
+    </div>
+</div>
+
+<div class="card card-custom mt-6">
+
+    <div class="card-body">
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Nome do médico</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(var doctor in doctorList)
+                {
+                    <tr>
+                        <th scope="row">@doctor.Id</th>
+                        <td>@doctor.Name</td>
+                        <td>@doctor.Email</td>
+                        <td>
+                            <button type="button" title="Atualizar médico" class="btn btn-light btn-sm" @onclick="@(() => UpdateDoctor(doctor.Id))"><i class="fa fa-pencil-square-o"></i></button>
+                            <button type="button" title="Deletar médico" class="btn btn-danger btn-sm" @onclick="@(() => DeleteDoctor(doctor.Id))"><i class="fa fa-times"></i></button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+
+</div>
+
+@code{
+    private DoctorModel doctorModel = new();
+    private List<DoctorModel> doctorList = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        doctorList = await doctorService.GetAllDoctorsAsync();
+
+        await Task.CompletedTask;
+    }
+
+    private void AddDoctor() => navigation.NavigateTo("/register-doctor/0");
+
+    private void UpdateDoctor(long doctorId) => navigation.NavigateTo($"/register-doctor/{doctorId}");
+
+    private async Task DeleteDoctor(long doctorId) 
+    {
+        await doctorService.DeleteDoctor(doctorId);
+
+        doctorList = await doctorService.GetAllDoctorsAsync();
+        StateHasChanged();
+    }
+}

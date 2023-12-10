@@ -1,0 +1,76 @@
+﻿@page "/grid-patients"
+
+@using HospitalAdmin.Data.Models
+@using HospitalAdmin.Services.Interfaces
+@inject NavigationManager navigation
+
+@inject IPatientService patientService
+
+<PageTitle>Gerenciar pacientes</PageTitle>
+
+<div class="form-group row">
+    <div class="col-9">
+        <h2>Gerenciar pacientes</h2>
+    </div>
+    <div class="col-3">
+        <button type="button" class="btn btn-success" @onclick="AddPatient">Adicionar paciente</button>
+
+    </div>
+</div>
+
+<div class="card card-custom mt-6">
+
+    <div class="card-body">
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Nome do paciente</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var patient in patientList)
+                {
+                    <tr>
+                        <th scope="row">@patient.Id</th>
+                        <td>@patient.Name</td>
+                        <td>@patient.Email</td>
+                        <td>
+                            <button type="button" title="Atualizar médico" class="btn btn-light btn-sm" @onclick="@(() => UpdatePatient(patient.Id))"><i class="fa fa-pencil-square-o"></i></button>
+                            <button type="button" title="Deletar médico" class="btn btn-danger btn-sm" @onclick="@(() => DeletePatient(patient.Id))"><i class="fa fa-times"></i></button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+
+</div>
+
+@code {
+    private PatientModel patientModel = new();
+    private List<PatientModel> patientList = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        patientList = await patientService.GetAllPatientsAsync();
+
+        await Task.CompletedTask;
+    }
+
+    private void AddPatient() => navigation.NavigateTo("/register-patient/0");
+
+    private void UpdatePatient(long patientId) => navigation.NavigateTo($"/register-patient/{patientId}");
+
+    private async Task DeletePatient(long patientId)
+    {
+        await patientService.DeletePatient(patientId);
+
+        patientList = await patientService.GetAllPatientsAsync();
+        StateHasChanged();
+    }
+}
