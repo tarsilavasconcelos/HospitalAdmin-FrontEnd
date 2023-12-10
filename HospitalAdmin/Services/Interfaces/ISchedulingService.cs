@@ -9,5 +9,6 @@ namespace HospitalAdmin.Services.Interfaces
         Task<bool> AddScheduling(SchedulingModel scheduling);
         Task<bool> UpdateScheduling(SchedulingModel scheduling);
         Task<bool> DeleteScheduling(long schedulingId);
+        Task<bool> ConfirmScheduling(long schedulingId);
     }
 }

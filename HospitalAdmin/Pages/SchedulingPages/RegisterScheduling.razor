@@ -26,7 +26,7 @@
                     <div class="col-sm-12 col-md-6">
                         <RadzenDropDown
                                     AllowClear="true"
-                                    class="form-control form-control-sm form-control-solid border-primary"
+                                    class="form-control form-control-solid"
                                     FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                                     FilterOperator="StringFilterOperator.Contains"
                                     AllowFiltering="true"
@@ -35,14 +35,17 @@
                                     Data=@doctorList
                                     ValueProperty="Id"
                                     TextProperty="Name"
-                                    @bind-Value="selectedDoctor" />
-
+                                    @bind-Value="schedulingModel.DoctorId" />
 
                     </div>
 
+                </div>
+
+                <div class="row mt-3">
+
                     <div class="col-sm-12 col-md-6">
                         <RadzenDropDown AllowClear="true"
-                                        class="form-control form-control-sm form-control-solid border-primary"
+                                        class="form-control form-control-solid"
                                         FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                                         FilterOperator="StringFilterOperator.Contains"
                                         AllowFiltering="true"
@@ -51,15 +54,23 @@
                                         Data=@patientList
                                         ValueProperty="Id"
                                         TextProperty="Name"
-                                        @bind-Value="selectedPatient" />
+                                        @bind-Value="schedulingModel.PatientId" />
                     </div>
+
+                    <div class="col-md-6">
+                        <RadzenDatePicker
+                            @bind-Value="schedulingModel.SchedulingDate"
+                            class="w-100"
+                            Placeholder="Data da consulta"/>
+                    </div>
+
                 </div>
 
                 <div class="row mt-4">
                     <div class="col-md-3">
                         <button type="submit" class="btn btn-secondary" @onclick="CancelButton">Cancelar</button>
 
-                        <button type="submit" class="btn btn-success">Salvar</button>
+                        <button type="submit" class="btn btn-success">Cadastrar</button>
                     </div>
                 </div>
 
@@ -77,9 +88,7 @@
 
     private SchedulingModel schedulingModel = new();
     private List<DoctorModel> doctorList = new();
-    private long selectedDoctor;
     private List<PatientModel> patientList = new();
-    private long selectedPatient;
 
     protected override async Task OnInitializedAsync()
     {
@@ -98,12 +107,12 @@
         if (Id == 0)
         {
             await schedulingService.AddScheduling(schedulingModel);
-            navigation.NavigateTo("/");
+            navigation.NavigateTo("/grid-scheduling");
         }
         else
         {
             await schedulingService.UpdateScheduling(schedulingModel);
-            navigation.NavigateTo("/");
+            navigation.NavigateTo("/grid-scheduling");
         }
         await Task.CompletedTask;
     }

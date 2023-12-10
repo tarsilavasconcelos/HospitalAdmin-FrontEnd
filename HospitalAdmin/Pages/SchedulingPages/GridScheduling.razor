@@ -1,0 +1,91 @@
+﻿@page "/grid-scheduling"
+
+@using HospitalAdmin.Data.Models
+@using HospitalAdmin.Services.Interfaces
+@inject NavigationManager navigation
+
+@inject ISchedulingService schedulingService
+
+<PageTitle>Gerenciar consultas</PageTitle>
+
+<div class="form-group row">
+    <div class="col-9">
+        <h2>Gerenciar consultas</h2>
+    </div>
+    <div class="col-3">
+        <button type="button" class="btn btn-success" @onclick="AddScheduling">Adicionar consulta</button>
+
+    </div>
+</div>
+
+<div class="card card-custom mt-6">
+
+    <div class="card-body">
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Descrição da consulta</th>
+                    <th scope="col">Médico</th>
+                    <th scope="col">Paciente</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Data da consulta</th>
+                    <th scope="col">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var scheduling in schedulingList)
+                {
+                    <tr>
+                        <th scope="row">@scheduling.Id</th>
+                        <td>@scheduling.Description</td>
+                        <td>@scheduling.Doctor?.Name</td>
+                        <td>@scheduling.Patient?.Name</td>
+                        <td>@scheduling.Status?.StatusName</td>
+                        <td>@scheduling.SchedulingDate</td>
+                        <td>
+                            <button type="button" title="Atualizar consulta" class="btn btn-light btn-sm" @onclick="@(() => UpdateScheduling(scheduling.Id))"><i class="fa fa-pencil-square-o"></i></button>
+                            <button type="button" title="Confimar consulta" class="btn btn-success btn-sm" @onclick="@(() => ConfirmScheduling(scheduling.Id))"><i class="fa fa-check"></i></button>
+                            <button type="button" title="Cancelar consulta" class="btn btn-danger btn-sm" @onclick="@(() => DeleteScheduling(scheduling.Id))"><i class="fa fa-times"></i></button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+
+</div>
+
+@code {
+    private SchedulingModel schedulingModel = new();
+    private List<SchedulingModel> schedulingList = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        schedulingList = await schedulingService.GetAllSchedulingsAsync();
+
+        await Task.CompletedTask;
+    }
+
+    private void AddScheduling() => navigation.NavigateTo("/register-scheduling/0");
+
+    private void UpdateScheduling(long schedulingId) => navigation.NavigateTo($"/register-scheduling/{schedulingId}");
+
+    private async Task DeleteScheduling(long schedulingId)
+    {
+        await schedulingService.DeleteScheduling(schedulingId);
+
+        schedulingList = await schedulingService.GetAllSchedulingsAsync();
+        StateHasChanged();
+    }
+
+    private async Task ConfirmScheduling(long schedulingId)
+    {
+        await schedulingService.ConfirmScheduling(schedulingId);
+
+        schedulingList = await schedulingService.GetAllSchedulingsAsync();
+        StateHasChanged();
+    }
+}

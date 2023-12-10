@@ -1,4 +1,6 @@
-﻿namespace HospitalAdmin.Data.Models
+﻿using System.Net.NetworkInformation;
+
+namespace HospitalAdmin.Data.Models
 {
     public class SchedulingModel
     {
@@ -9,6 +11,8 @@
         public int PatientId { get; set; }
         public PatientModel? Patient { get; set; }
         public DateTime? SchedulingDate { get; set; }
-        public string? StatusId { get; set; }
+        public int? StatusId { get; set; } = 3;
+        public StatusModel? Status { get; set; }
+
     }
 }
